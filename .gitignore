@@ -1,3 +1,11 @@
+# Ignore everything under examples/localdatasets/*/
+examples/local_datasets/*/*
+
+# But keep __init__.py files
+!examples/local_datasets/*/__init__.py
+
+
+
 # Created by https://www.toptal.com/developers/gitignore/api/python,cuda
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,cuda
 
