@@ -9,6 +9,7 @@ dependencies = [
     "ninja>=1.13.0",
     "numpy>=2.4.0",
     "torch>=2.9.1",
+    "torchvision>=0.24.1",
 ]
 license = {text = "MIT"}
 classifiers = [

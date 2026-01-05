@@ -1,6 +1,5 @@
 from pathlib import Path
 import torch.utils.cpp_extension
-import torch.nn.functional
 
 __all__ = ['bspgemm']
 
