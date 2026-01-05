@@ -5,7 +5,7 @@
 
 
 #include <torch/extension.h>
-#include <cutlass/gemm/device/gemm_batched.h>
+#include "cutlass/gemm/device/gemm_batched.h"
 #include <cutlass/layout/matrix.h>
 
 torch::Tensor bspgemm(

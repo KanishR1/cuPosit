@@ -1,6 +1,6 @@
 from icecream import ic
 import torch
-import src as cuposit
+import cuposit
 
 
 seed=42

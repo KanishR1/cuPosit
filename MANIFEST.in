@@ -1,0 +1,6 @@
+include README.md
+include LICENSE
+recursive-include cusrc *.cu *.h *.hpp
+recursive-include cutlass/include *
+recursive-include cutlass/tools/util/include *
+recursive-include cutlass/examples/common *
