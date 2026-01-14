@@ -25,10 +25,9 @@ Supports posit_n from 4 to 28, and posit_es == 2.
 1. Clone this directory into your project folder.
 2. Activate your Python virtual environment.
 3. `cd` into this folder.
-4. Install dependencies `pip install ninja torch` (see pyproject.toml).
-5. Run `pip install -e .`.
+4. Run `pip install -e ./cuPosit/`.
 
-Now you can use cuposit in your environment.
+Now you can use cuposit in your environment. If you see any dependency errors, install them with `pip install ninja torch` (see pyproject.toml).
 
 # Development
 
