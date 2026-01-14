@@ -23,15 +23,6 @@
     } while (0)
 
 
-__global__ void kernel_posit_clip(float* out, const float* in, int n) {
-    int idx = blockIdx.x * blockDim.x + threadIdx.x;
-    if (idx < n) {
-        out[idx] = posit_clip(in[idx]);
-        // out[idx] = in[idx] > 0 ? in[idx] : 0.0f;
-    }
-}
-
-
 int main(int argc, char** argv) {
     const int N = 1024 * 1024 * 4; 
     size_t bytes = N * sizeof(float);

@@ -23,7 +23,7 @@ __forceinline__ __device__ float posit_clip(float number) {
     // msb of cutoff bits is 1. but we aren't doing that here.
 
     // posit_* variables are available in constant memory
-    unsigned x_exponent = (__float_as_uint(number) >> 23) & 0xFF; // TODO: see if frexpf is any faster
+    unsigned x_exponent = (__float_as_uint(number) >> 23) & 0xFF;
     x_exponent = min( max(x_exponent, CUPOSIT_EXP_MIN), CUPOSIT_EXP_MAX);
 
     // unset exponent bits and unneeded mantissa bits, and then copy exponent bits
@@ -31,4 +31,11 @@ __forceinline__ __device__ float posit_clip(float number) {
         (__float_as_uint(number) & (0x807FFFFF & (0xFFFFFFFF << (23 - lutmap(x_exponent))))) |
         ((x_exponent) << 23)
     );
+}
+
+__global__ void kernel_posit_clip(float* out, const float* in, int n) {
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    if (idx < n) {
+        out[idx] = posit_clip(in[idx]);
+    }
 }
