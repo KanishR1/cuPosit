@@ -39,6 +39,8 @@ void posit_clip(torch::Tensor A) {
     kernel_posit_clip<<<blocks, threads>>>(data, data, n);
 }
 
+// This method will happily overwrite input matrices
+// see python cuposit/bspgemm.py and only send clones of tensors
 torch::Tensor bspgemm(
     torch::Tensor A,
     torch::Tensor B,

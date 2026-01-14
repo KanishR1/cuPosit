@@ -27,13 +27,20 @@ def bspgemm(A, B, C, alpha=1.0, beta=1.0, posit=(28, 2)):
     detach = lambda x: x.detach().contiguous().clone()
 
     if (posit[0] >= 4 and posit[1] == 2) or posit == (0, 0):
-        return _CUDA.bspgemm(
-            detach(A),
-            detach(B),
-            detach(C),
+        _A, _B, _C = detach(A), detach(B), detach(C)
+         
+        result = _CUDA.bspgemm(
+            _A, _B, _C,
             alpha, beta,
             posit[0], posit[1]
         )
 
-    raise ValueError(f"Invalid Posit configuration: {posit}. See Usage section of readme.")
+        C.copy_(result) # btw, _C and result point to the same tensor
 
+        del _A
+        del _B
+        del _C
+
+        return C
+
+    raise ValueError(f"Invalid Posit configuration: {posit}. See Usage section of readme.")
