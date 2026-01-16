@@ -1,5 +1,4 @@
-from pathlib import Path
-import torch.utils.cpp_extension
+from torch import Tensor
 
 __all__ = ['bspgemm']
 
@@ -11,28 +10,40 @@ except ImportError:
         "Please install cuposit properly: pip install -e ."
     )
 
-# Path('build/bspgemm_cuda').mkdir(exist_ok=True, parents=True)
-# bspgemm_cuda = torch.utils.cpp_extension.load(
-#     name='bspgemm',
-#     sources=['cusrc/bspgemm.cu'],
-#     extra_include_paths=['cutlass/include', 'cutlass/tools/util/include', 'cutlass/examples/common'],
-#     extra_cflags=['-O3'],
-#     extra_cuda_cflags=['-O3'],
-#     build_directory='build/bspgemm_cuda',
-#     with_cuda=True,
-#     verbose=True
-# )
 
-def bspgemm(A, B, C, alpha=1.0, beta=1.0, posit=(28, 2)):
-    detach = lambda x: x.detach().contiguous().clone()
+def bspgemm(
+    posit_config: dict[str, int] | int,
+    A: Tensor,
+    B: Tensor,
+    C: Tensor,
+    alpha: float = 1.0,
+    beta: float = 1.0,
+) -> Tensor:
+    def detach(x: Tensor) -> Tensor:
+        return x.detach().contiguous().clone()
+    
+    posit_config_dict: dict[str, int] = {}
+    if type(posit_config) is int: 
+        posit_config_dict = {
+            'n': posit_config,
+            'es': 2,
+            'rs': posit_config - 1
+        }
+    else:
+        posit_config_dict = posit_config # pyright: ignore[reportAssignmentType]
+    
+    if 'rs' not in posit_config_dict or posit_config_dict['rs'] is None:
+        posit_config_dict['rs'] = posit_config_dict['n'] - 1
+    if 'es' not in posit_config_dict or posit_config_dict['es'] is None:
+        posit_config_dict['es'] = 2
 
-    if (posit[0] >= 4 and posit[1] == 2) or posit == (0, 0):
+    if posit_config_dict['n'] >= 4:
         _A, _B, _C = detach(A), detach(B), detach(C)
          
         result = _CUDA.bspgemm(
             _A, _B, _C,
             alpha, beta,
-            posit[0], posit[1]
+            posit_config_dict['n'], posit_config_dict['es'], posit_config_dict['rs']
         )
 
         del _A
@@ -40,4 +51,4 @@ def bspgemm(A, B, C, alpha=1.0, beta=1.0, posit=(28, 2)):
 
         return result
 
-    raise ValueError(f"Invalid Posit configuration: {posit}. See Usage section of readme.")
+    raise ValueError(f"Invalid Posit configuration: {posit_config}. See Usage section of readme.")

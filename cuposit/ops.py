@@ -1,16 +1,23 @@
 import torch
+from torch import Tensor
 from cuposit import bspgemm
 
 # https://docs.pytorch.org/docs/stable/generated/torch.addmm.html
-def mm(mat1, mat2, out_dtype=None, out=None, positnes=(0, 0)):
+def mm(
+    posit_config: dict[str, int],
+    mat1: Tensor,
+    mat2: Tensor,
+    out_dtype: torch.dtype | None=None,
+    out: Tensor | None = None,
+):
     assert mat1.dim() == 2 and mat2.dim() == 2, "mat1 and mat2 should be 2D tensors"
     assert mat1.shape[1] == mat2.shape[0], "mat1 and mat2 have incompatible shapes for mm"
-    mat1_m, mat1_n = mat1.shape
-    mat2_n, mat2_k = mat2.shape
 
-    # print('mm', mat1.shape, mat2.shape)
+    if out is not None: 
+        raise NotImplementedError("param out is not supported yet")
 
     return torch.squeeze(bspgemm(
+        posit_config,
         torch.broadcast_to(mat1, (1, *mat1.shape)), # A
         torch.broadcast_to(mat2, (1, *mat2.shape)), # B
         torch.zeros((1, mat1.shape[0], mat2.shape[1]), dtype=torch.float32, device="cuda"), # C
@@ -20,15 +27,24 @@ def mm(mat1, mat2, out_dtype=None, out=None, positnes=(0, 0)):
 
 
 # https://docs.pytorch.org/docs/stable/generated/torch.addmm.html
-def addmm(input, mat1, mat2, out_dtype=None, beta=1, alpha=1, out=None, positnes=(0, 0)):
+def addmm(
+    posit_config: dict[str, int],
+    input: Tensor,
+    mat1: Tensor,
+    mat2: Tensor,
+    out_dtype: torch.dtype | None=None,
+    beta: float = 1,
+    alpha: float = 1,
+    out: Tensor | None = None,
+):
     assert mat1.dim() == 2 and mat2.dim() == 2, "mat1 and mat2 should be 2D tensors"
     assert mat1.shape[1] == mat2.shape[0], "mat1 and mat2 have incompatible shapes for mm"
-    mat1_m, mat1_n = mat1.shape
-    mat2_n, mat2_k = mat2.shape
 
-    # print('addm', input.shape, mat1.shape, mat2.shape)
+    if out is not None: 
+        raise NotImplementedError("param out is not supported yet")
 
     return torch.squeeze(bspgemm(
+        posit_config,
         torch.broadcast_to(mat1, (1, *mat1.shape)), # A
         torch.broadcast_to(mat2, (1, *mat2.shape)), # B
         torch.broadcast_to(input, (1, mat1.shape[0], mat2.shape[1])), # C
@@ -37,8 +53,18 @@ def addmm(input, mat1, mat2, out_dtype=None, beta=1, alpha=1, out=None, positnes
     ), dim=0)
 
 
-
-def convolution(input, weight, bias, stride, padding, dilation, transposed, output_padding, groups, positnes=(0, 0)):
+def convolution(
+    posit_config: dict[str, int],
+    input: Tensor,
+    weight: Tensor,
+    bias: Tensor,
+    stride,
+    padding: list[int],
+    dilation,
+    transposed,
+    output_padding,
+    groups,
+):
     assert not transposed, "Transposed convolution not supported"
     assert groups == 1, "Grouped convolution not supported"
 
@@ -83,6 +109,7 @@ def convolution(input, weight, bias, stride, padding, dilation, transposed, outp
     # A: (N, C_out, C_in*kH*kW), B: (N, C_in*kH*kW, H_out*W_out), C: (N, C_out, H_out*W_out)
     
     output = bspgemm(
+        posit_config,
         weight_batched,  # (N, C_out, C_in*kH*kW)
         input_unfolded,  # (N, C_in*kH*kW, H_out*W_out)
         bias.view(1, C_out, 1).expand(N, -1, H_out * W_out) if bias is not None 

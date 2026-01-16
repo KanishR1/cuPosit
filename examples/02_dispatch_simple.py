@@ -3,7 +3,7 @@ from torch.overrides import TorchFunctionMode
 from torch.utils._python_dispatch import TorchDispatchMode
 
 from cuposit.dispatcher import MatMulDispatcher
-dispatcher = MatMulDispatcher(positnes=(28, 2))
+dispatcher = MatMulDispatcher(posit_config={'n': 8, 'es': 2, 'rs': 4})
 
 x = torch.randn(40, 50, requires_grad=True, device='cuda')
 w = torch.randn(50, 60, requires_grad=True, device='cuda')

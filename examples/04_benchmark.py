@@ -25,13 +25,13 @@ def benchmark_bspgemm(
                     C = torch.zeros(batch, M, N, dtype=torch.float32, device='cuda')
                     
                     for _ in range(warmup_iters):
-                        cuposit.bspgemm(A, B, C, 1.0, 0.0, (posit_n, posit_es))
+                        cuposit.bspgemm({'n': 16, 'es': 5, 'rs': 6}, A, B, C, 1.0, 0.0)
                     
                     torch.cuda.synchronize()
                     
                     start = time.perf_counter()
                     for _ in range(bench_iters):
-                        cuposit.bspgemm(A, B, C, 1.0, 0.0, (posit_n, posit_es))
+                        cuposit.bspgemm({'n': 16, 'es': 5, 'rs': 6}, A, B, C, 1.0, 0.0)
                     torch.cuda.synchronize()
                     end = time.perf_counter()
                     
@@ -68,13 +68,13 @@ def compare_with_torch(
     C_torch = torch.zeros(batch, M, N, device='cuda')
     
     for _ in range(10):
-        cuposit.bspgemm(A, B, C_posit, 1.0, 0.0, (posit_n, posit_es))
+        cuposit.bspgemm({'n': 8, 'es': 2, 'rs': 4}, A, B, C_posit, 1.0, 0.0)
         torch.bmm(A, B, out=C_torch)
     
     torch.cuda.synchronize()
     start = time.perf_counter()
     for _ in range(iters):
-        cuposit.bspgemm(A, B, C_posit, 1.0, 0.0, (posit_n, posit_es))
+        cuposit.bspgemm({'n': 8, 'es': 2, 'rs': 4}, A, B, C_posit, 1.0, 0.0)
     torch.cuda.synchronize()
     posit_time = time.perf_counter() - start
     
