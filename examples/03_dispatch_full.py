@@ -1,11 +1,10 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torchvision import datasets, transforms
 from local_datasets.cifar10 import train_loader, test_loader, image_transform, dsetname, dsetnclasses
 
 from cuposit.dispatcher import MatMulDispatcher
-dispatcher = MatMulDispatcher(positnes=(16, 2))
+dispatcher = MatMulDispatcher(posit_config={'n': 16, 'es': 5, 'rs': 6})
 
 
 class SimpleConvNet(nn.Module):
@@ -74,7 +73,7 @@ if __name__ == '__main__':
     # Train in Float32
     print("Training in Float32")
     dispatcher.enabled = False
-    train(epochs=10)
+    train(epochs=1)
     test()
 
     # Reduce Learning Rate, and QAT for Posit

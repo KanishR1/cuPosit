@@ -1,4 +1,4 @@
-__constant__ unsigned CUPOSIT_ENABLED;
+__constant__ unsigned CUPOSIT_ES;
 __constant__ unsigned CUPOSIT_EXP_MIN;
 __constant__ unsigned CUPOSIT_EXP_MAX;
 __constant__ unsigned CUPOSIT_NMANTISSA_MAX;
@@ -6,10 +6,10 @@ __constant__ unsigned CUPOSIT_NMANTISSA_MAX;
 /////////////////////////////////////////////////////////////////////////////////////////////////
 // https://maknee.github.io/blog/2025/Maybe-Consider-Putting-Cutlass-In-Your-CUDA-Kernels/
 __forceinline__ __device__ unsigned lutmap(unsigned input) {
-    // if input(exponent) is >= 0 (127), find difference from 0 (127) and divide by 4
-    // if input(exponent) is < 0 (127), find difference from -1 (126) and divide by 4
+    // if input(exponent) is >= 0 (127), find difference from 0 (127) and divide by 2^es
+    // if input(exponent) is < 0 (127), find difference from -1 (126) and divide by 2^es
     // and then subtract the result from the highest mantissa possible
-    return CUPOSIT_NMANTISSA_MAX - (__usad(126 + (input >= 127), input, 0) >> 2);
+    return CUPOSIT_NMANTISSA_MAX - (__usad(126 + (input >= 127), input, 0) >> CUPOSIT_ES);
 }
 
 __forceinline__ __device__ float posit_clip(float number) {

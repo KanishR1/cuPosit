@@ -22,6 +22,15 @@
         } \
     } while (0)
 
+void set_posit_constants(unsigned posit_n, unsigned posit_es, unsigned posit_rs) {
+    unsigned const host_cuposit_nmantissa_max = posit_n - 3 - posit_es; // 1 bit for sign, 2 for regime, and posit_es bits for exponent
+    unsigned const host_cuposit_exp_min = 127 - ((posit_rs - posit_es - 1)*(1 << posit_es) - 1);
+    unsigned const host_cuposit_exp_max = 127 + ((posit_rs - posit_es - 1)*(1 << posit_es) - 1);
+
+    cudaMemcpyToSymbol(CUPOSIT_EXP_MIN, &host_cuposit_exp_min, sizeof(unsigned));
+    cudaMemcpyToSymbol(CUPOSIT_EXP_MAX, &host_cuposit_exp_max, sizeof(unsigned));
+    cudaMemcpyToSymbol(CUPOSIT_NMANTISSA_MAX, &host_cuposit_nmantissa_max, sizeof(unsigned));
+}
 
 int main(int argc, char** argv) {
     const int N = 1024 * 1024 * 4; 
@@ -48,7 +57,6 @@ int main(int argc, char** argv) {
     unsigned const host_cuposit_exp_min = 127 - 7;
     unsigned const host_cuposit_exp_max = 127 + 7;
     unsigned const host_cuposit_nmantissa_max = 1;
-    cudaMemcpyToSymbol(CUPOSIT_ENABLED, &host_cuposit_enabled, sizeof(unsigned));
     cudaMemcpyToSymbol(CUPOSIT_EXP_MIN, &host_cuposit_exp_min, sizeof(unsigned));
     cudaMemcpyToSymbol(CUPOSIT_EXP_MAX, &host_cuposit_exp_max, sizeof(unsigned));
     cudaMemcpyToSymbol(CUPOSIT_NMANTISSA_MAX, &host_cuposit_nmantissa_max, sizeof(unsigned));
